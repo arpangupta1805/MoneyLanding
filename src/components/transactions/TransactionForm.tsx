@@ -24,7 +24,6 @@ export const TransactionForm = () => {
   const [calculatedEmi, setCalculatedEmi] = useState<number | null>(null);
   const [totalAmount, setTotalAmount] = useState<number | null>(null);
   const [totalInterest, setTotalInterest] = useState<number | null>(null);
-  const [isPhoneVerified, setIsPhoneVerified] = useState(false);
   const [isSearchingUser, setIsSearchingUser] = useState(false);
 
   // Calculate EMI when amount, interest rate, and duration change
@@ -58,7 +57,6 @@ export const TransactionForm = () => {
   const handlePhoneChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const phoneValue = e.target.value.trim();
     setPhone(phoneValue);
-    setIsPhoneVerified(false); // Reset verification on change
 
     if (phoneValue.length === 10) {
       // Start searching - show loader
@@ -75,7 +73,6 @@ export const TransactionForm = () => {
           setBorrowerFatherName(profile.borrowerFatherName || '');
           setAddress(profile.address || '');
           setVillage(profile.village || '');
-          setIsPhoneVerified(true);
           
           // Show success toast
           toast.success('Found existing borrower! Form has been pre-filled.', {
@@ -99,7 +96,6 @@ export const TransactionForm = () => {
           setBorrowerFatherName(userData.fatherName || '');
           setAddress(userData.address || '');
           setVillage(userData.village || '');
-          setIsPhoneVerified(true);
           
           // Also save this user to local borrower profiles for future use
           saveBorrowerProfile({

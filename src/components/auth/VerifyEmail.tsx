@@ -10,7 +10,6 @@ export const VerifyEmail = ({ onBack }: VerifyEmailProps) => {
   const { verificationState, verifyEmail, resendVerification, isLoading } = useAuth();
   const [otp, setOtp] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const [showMockInfo, setShowMockInfo] = useState(false);
   const [otpSending, setOtpSending] = useState(true);
   
   // Focus on OTP input when component mounts

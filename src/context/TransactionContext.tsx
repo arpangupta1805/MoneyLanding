@@ -10,7 +10,6 @@ import type {
 } from '../types/index';
 import { useAuth } from './AuthContext';
 import { authAPI } from '../services/api';
-import { toast } from 'react-toastify';
 
 interface TransactionContextType {
   transactions: Transaction[];
@@ -380,7 +379,6 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
     if (!transaction) return { remainingBalance: 0, totalInterest: 0, savedInterest: 0 };
 
     const startDate = new Date(transaction.startDate);
-    const endDate = new Date(transaction.endDate);
     const originalDurationMonths = transaction.duration;
     
     // Calculate completed months (partial months are counted as full)
@@ -391,15 +389,11 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
     // Limit to maximum duration
     const effectiveDuration = Math.min(completedMonths, originalDurationMonths);
     
-    // Calculate interest for the actual duration for the initial loan
-    const monthlyRate = transaction.interestRate / 100 / 12;
-    const originalTotalPayable = transaction.totalPayable;
     
     // Calculate what would have been paid with the actual duration for initial amount
     // Use simple interest formula: P * R * T (where T is in years)
     const yearFraction = effectiveDuration / 12; // Convert months to years
     const actualInterest = transaction.initialAmount * (transaction.interestRate / 100) * yearFraction;
-    const actualTotalPayable = transaction.initialAmount + actualInterest;
     
     // Get additional borrowings with their interest rates
     const additionalBorrowingEntries = payments

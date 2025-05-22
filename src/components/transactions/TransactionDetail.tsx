@@ -13,7 +13,6 @@ export const TransactionDetail = () => {
     getPaymentsByTransactionId, 
     addPayment,
     addAdditionalBorrowing,
-    updateTransactionStatus,
     calculateEarlyPayoff,
     completeTransaction
   } = useTransactions();
@@ -153,9 +152,6 @@ export const TransactionDetail = () => {
       : 'bg-red-50 border-red-500 dark:bg-red-900/20';
   };
 
-  const handleStatusUpdate = (status: TransactionType['status']) => {
-    updateTransactionStatus(transaction.id, status);
-  };
 
   const calculateProgress = () => {
     if (transaction.initialAmount === 0) return 0;
