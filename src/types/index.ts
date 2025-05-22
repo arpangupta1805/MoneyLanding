@@ -1,8 +1,13 @@
 export type User = {
   id: string;
   username: string;
-  name: string;
+  fullName: string;
+  email: string;
+  fatherName?: string;
   password: string; // In a real app, we wouldn't store plain passwords
+  phoneNumber: string;
+  village: string;
+  address?: string;
 };
 
 export type TransactionStatus = 'active' | 'partially_paid' | 'completed' | 'overdue';
@@ -13,6 +18,10 @@ export type Transaction = {
   borrowerId: string;
   borrowerUsername: string;
   borrowerName: string;
+  borrowerFatherName: string;
+  address: string;
+  village: string;
+  phone: string;
   amount: number;
   interestRate: number;
   duration: number; // in months
@@ -21,6 +30,9 @@ export type Transaction = {
   status: TransactionStatus;
   remainingBalance: number;
   initialAmount: number;
+  monthlyEmi: number;
+  totalPayable: number;
+  totalInterest: number;
 };
 
 export type PaymentEntry = {
@@ -30,6 +42,7 @@ export type PaymentEntry = {
   date: string;
   type: 'payment' | 'additional_borrowing';
   notes?: string;
+  interestRate?: number; // Optional interest rate for additional borrowing
 };
 
 export type UserStats = {
@@ -66,10 +79,22 @@ export interface Loan {
   notes?: string;
 }
 
-export interface DashboardStats {
+export type DashboardStats = {
   totalLent: number;
   totalBorrowed: number;
   totalRepaid: number;
   upcomingDues: number;
   overdueDues: number;
-} 
+}
+
+// New type for storing borrower profile data for autofill
+export type BorrowerProfile = {
+  id: string;
+  phone: string;
+  borrowerName: string;
+  borrowerFatherName: string;
+  borrowerUsername: string; 
+  address: string;
+  village: string;
+  lastUpdated: string; // ISO date string to track when this profile was last updated
+}; 

@@ -1,17 +1,12 @@
-import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Dashboard } from '../dashboard/Dashboard';
-import { TransactionForm } from '../transactions/TransactionForm';
 
 export const DashboardPage = () => {
-  const [showNewTransactionForm, setShowNewTransactionForm] = useState(false);
+  const navigate = useNavigate();
 
-  return (
-    <div>
-      <Dashboard onNewTransaction={() => setShowNewTransactionForm(true)} />
-      
-      {showNewTransactionForm && (
-        <TransactionForm onClose={() => setShowNewTransactionForm(false)} />
-      )}
-    </div>
-  );
+  const handleNewTransaction = () => {
+    navigate('/new-transaction');
+  };
+
+  return <Dashboard onNewTransaction={handleNewTransaction} />;
 }; 

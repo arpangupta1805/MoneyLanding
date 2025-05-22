@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Layout } from './components/layout/Layout';
 import { AuthPage } from './components/auth/AuthPage';
@@ -13,6 +12,8 @@ import { useAuth } from './context/AuthContext';
 import { AuthProvider } from './context/AuthContext';
 import { TransactionProvider } from './context/TransactionContext';
 import { ThemeProvider } from './context/ThemeContext';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 // Protect routes that require authentication
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -37,8 +38,6 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 function App() {
-  const [showTransactionForm, setShowTransactionForm] = useState(false);
-
   return (
     <ThemeProvider>
       <AuthProvider>
@@ -47,7 +46,7 @@ function App() {
             <Layout>
               <Routes>
                 <Route 
-                  path="/auth" 
+                  path="auth" 
                   element={
                     <PublicRoute>
                       <AuthPage />
@@ -55,7 +54,7 @@ function App() {
                   } 
                 />
                 <Route 
-                  path="/dashboard" 
+                  path="dashboard" 
                   element={
                     <ProtectedRoute>
                       <DashboardPage />
@@ -63,7 +62,7 @@ function App() {
                   } 
                 />
                 <Route 
-                  path="/lent" 
+                  path="lent" 
                   element={
                     <ProtectedRoute>
                       <LentPage />
@@ -71,7 +70,7 @@ function App() {
                   } 
                 />
                 <Route 
-                  path="/borrowed" 
+                  path="borrowed" 
                   element={
                     <ProtectedRoute>
                       <BorrowedPage />
@@ -79,7 +78,7 @@ function App() {
                   } 
                 />
                 <Route 
-                  path="/overdue" 
+                  path="overdue" 
                   element={
                     <ProtectedRoute>
                       <OverduePage />
@@ -87,7 +86,7 @@ function App() {
                   } 
                 />
                 <Route 
-                  path="/settled" 
+                  path="settled" 
                   element={
                     <ProtectedRoute>
                       <SettledPage />
@@ -95,21 +94,26 @@ function App() {
                   } 
                 />
                 <Route 
-                  path="/transaction/:id" 
+                  path="transaction/:id" 
                   element={
                     <ProtectedRoute>
                       <TransactionDetail />
                     </ProtectedRoute>
                   } 
                 />
-                <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                <Route 
+                  path="new-transaction" 
+                  element={
+                    <ProtectedRoute>
+                      <TransactionForm />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route path="" element={<Navigate to="/dashboard" replace />} />
                 <Route path="*" element={<Navigate to="/dashboard" replace />} />
               </Routes>
-              
-              {showTransactionForm && (
-                <TransactionForm onClose={() => setShowTransactionForm(false)} />
-              )}
             </Layout>
+            <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} />
           </Router>
         </TransactionProvider>
       </AuthProvider>

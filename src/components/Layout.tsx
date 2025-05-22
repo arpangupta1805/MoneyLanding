@@ -22,17 +22,12 @@ import {
   Menu as MenuIcon,
   Dashboard,
   MonetizationOn,
-  AccessTime,
-  CheckCircle,
-  Brightness4,
-  Brightness7,
   AccountCircle,
   Add,
   Logout,
 } from '@mui/icons-material';
 
 import { useAuth } from '../context/AuthContext';
-import { useTheme } from '../context/ThemeContext';
 
 const drawerWidth = 240;
 
@@ -41,7 +36,6 @@ const Layout = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   
   const { currentUser, logout } = useAuth();
-  const { mode, toggleTheme } = useTheme();
   const muiTheme = useMuiTheme();
   const navigate = useNavigate();
 
@@ -67,8 +61,6 @@ const Layout = () => {
     { text: 'Dashboard', icon: <Dashboard />, path: '/' },
     { text: 'Lent', icon: <MonetizationOn />, path: '/lent' },
     { text: 'Borrowed', icon: <MonetizationOn />, path: '/borrowed' },
-    { text: 'Overdue', icon: <AccessTime />, path: '/overdue' },
-    { text: 'Settled', icon: <CheckCircle />, path: '/settled' },
   ];
 
   const drawer = (
@@ -120,13 +112,9 @@ const Layout = () => {
             {currentUser ? `Welcome, ${currentUser.name}` : 'MoneySense'}
           </Typography>
           
-          <IconButton color="inherit" onClick={toggleTheme}>
-            {mode === 'dark' ? <Brightness7 /> : <Brightness4 />}
-          </IconButton>
-          
           <IconButton 
             color="inherit" 
-            onClick={() => navigate('/add-loan')}
+            onClick={() => navigate('/new-transaction')}
             sx={{ marginLeft: 1 }}
           >
             <Add />

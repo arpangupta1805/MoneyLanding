@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useTransactions } from '../../context/TransactionContext';
 import { useAuth } from '../../context/AuthContext';
@@ -19,16 +19,47 @@ export const Dashboard = ({ onNewTransaction }: DashboardProps) => {
   
   const stats = getUserStats();
   
-  // Get recent transactions (last 5)
-  const recentTransactions = [...transactions]
-    .filter(t => t.lenderId === currentUser?.id || t.borrowerId === currentUser?.id)
-    .sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())
-    .slice(0, 5);
+  // Get all transactions for current user
+  const userTransactions = useMemo(() => {
+    return transactions.filter(t => t.lenderId === currentUser?.id || t.borrowerId === currentUser?.id)
+      .sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime());
+  }, [transactions, currentUser]);
+
+  // State for search and filter
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedVillage, setSelectedVillage] = useState<string>('');
+
+  // Get unique village names
+  const villageOptions = useMemo(() => {
+    const villages = new Set<string>();
+    userTransactions.forEach(t => {
+      if (t.village) {
+        villages.add(t.village);
+      }
+    });
+    return Array.from(villages).sort();
+  }, [userTransactions]);
+
+  // Filter transactions based on search term and selected village
+  const filteredTransactions = useMemo(() => {
+    return userTransactions.filter(transaction => {
+      const matchesSearch = searchTerm === '' || 
+        transaction.borrowerName.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      const matchesVillage = selectedVillage === '' || 
+        transaction.village === selectedVillage;
+      
+      return matchesSearch && matchesVillage;
+    });
+  }, [userTransactions, searchTerm, selectedVillage]);
+
+  // Get recent transactions (first 5 after filtering)
+  const recentTransactions = filteredTransactions.slice(0, 5);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD',
+      currency: 'INR',
     }).format(amount);
   };
 
@@ -45,6 +76,14 @@ export const Dashboard = ({ onNewTransaction }: DashboardProps) => {
       default:
         return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
     }
+  };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+  };
+
+  const handleVillageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedVillage(e.target.value);
   };
 
   return (
@@ -120,9 +159,6 @@ export const Dashboard = ({ onNewTransaction }: DashboardProps) => {
                 {stats.overdueBorrowed > 0 && (
                   <span>You owe {formatCurrency(stats.overdueBorrowed)} in overdue loans. </span>
                 )}
-                <Link to="/overdue" className="font-medium underline hover:text-red-600">
-                  View all overdue
-                </Link>
               </p>
             </div>
           </div>
@@ -131,7 +167,39 @@ export const Dashboard = ({ onNewTransaction }: DashboardProps) => {
 
       {/* Recent Transactions */}
       <div>
-        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Recent Transactions</h2>
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white">Recent Transactions</h2>
+          
+          <div className="mt-3 md:mt-0 flex flex-col md:flex-row gap-3">
+            {/* Search input */}
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search by name..."
+                value={searchTerm}
+                onChange={handleSearchChange}
+                className="w-full md:w-auto pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+              />
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+            </div>
+            
+            {/* Village filter */}
+            <select
+              value={selectedVillage}
+              onChange={handleVillageChange}
+              className="w-full md:w-auto px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+            >
+              <option value="">All Villages</option>
+              {villageOptions.map(village => (
+                <option key={village} value={village}>{village}</option>
+              ))}
+            </select>
+          </div>
+        </div>
         
         {recentTransactions.length > 0 ? (
           <div className="overflow-x-auto">
@@ -140,13 +208,14 @@ export const Dashboard = ({ onNewTransaction }: DashboardProps) => {
                 <tr>
                   <th className="py-3 px-4 text-left">Type</th>
                   <th className="py-3 px-4 text-left">Person</th>
+                  <th className="py-3 px-4 text-left">Village</th>
                   <th className="py-3 px-4 text-left">Amount</th>
                   <th className="py-3 px-4 text-left">Status</th>
                   <th className="py-3 px-4 text-left">Date</th>
                   <th className="py-3 px-4 text-left">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+              <tbody className="divide-y bg-gray-200 divide-gray-700">
                 {recentTransactions.map((transaction) => (
                   <tr key={transaction.id} className="hover:bg-gray-50 dark:hover:bg-gray-750">
                     <td className="py-3 px-4">
@@ -156,6 +225,9 @@ export const Dashboard = ({ onNewTransaction }: DashboardProps) => {
                       {transaction.lenderId === currentUser?.id
                         ? transaction.borrowerName
                         : transaction.lenderId /* We should store lender name too */}
+                    </td>
+                    <td className="py-3 px-4">
+                      {transaction.village}
                     </td>
                     <td className="py-3 px-4 font-medium">
                       {formatCurrency(transaction.amount)}
@@ -183,13 +255,19 @@ export const Dashboard = ({ onNewTransaction }: DashboardProps) => {
           </div>
         ) : (
           <div className="text-center p-8 bg-white dark:bg-gray-800 rounded-lg">
-            <p className="text-gray-500 dark:text-gray-400">No transactions yet.</p>
-            <button
-              onClick={onNewTransaction}
-              className="mt-4 text-primary-600 dark:text-primary-400 font-medium hover:underline"
-            >
-              Create your first transaction
-            </button>
+            <p className="text-gray-500 dark:text-gray-400">
+              {userTransactions.length > 0 
+                ? 'No transactions match your search criteria.' 
+                : 'No transactions yet.'}
+            </p>
+            {userTransactions.length === 0 && (
+              <button
+                onClick={onNewTransaction}
+                className="mt-4 text-primary-600 dark:text-primary-400 font-medium hover:underline"
+              >
+                Create your first transaction
+              </button>
+            )}
           </div>
         )}
       </div>
@@ -205,7 +283,7 @@ export const Dashboard = ({ onNewTransaction }: DashboardProps) => {
                 .map((transaction) => (
                   <div
                     key={transaction.id}
-                    className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-750 rounded"
+                    className="flex justify-between items-center p-2 bg-gray-750 rounded-xl"
                   >
                     <div>
                       <p className="font-medium text-gray-800 dark:text-gray-200">
@@ -252,7 +330,7 @@ export const Dashboard = ({ onNewTransaction }: DashboardProps) => {
                   >
                     <div>
                       <p className="font-medium text-gray-800 dark:text-gray-200">
-                        From: {transaction.lenderId} {/* We should store lender name */}
+                        From: {transaction.lenderId}
                       </p>
                       <p className="text-sm text-gray-500 dark:text-gray-400">
                         {new Date(transaction.startDate).toLocaleDateString()}

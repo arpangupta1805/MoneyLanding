@@ -1,12 +1,11 @@
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { useTheme } from '../../context/ThemeContext';
 
 export const Navbar = () => {
   const { currentUser, logout } = useAuth();
-  const { themeMode, toggleTheme } = useTheme();
   const location = useLocation();
+  const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const toggleMenu = () => {
@@ -25,8 +24,6 @@ export const Navbar = () => {
     { to: '/dashboard', label: 'Dashboard' },
     { to: '/lent', label: 'Lent' },
     { to: '/borrowed', label: 'Borrowed' },
-    { to: '/overdue', label: 'Overdue' },
-    { to: '/settled', label: 'Settled' },
   ];
 
   return (
@@ -73,43 +70,26 @@ export const Navbar = () => {
           </div>
 
           <div className="flex items-center">
-            {/* Theme toggle */}
+            {/* New Transaction Button */}
             <button
-              onClick={toggleTheme}
-              className="p-2 rounded-md text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white"
-              aria-label="Toggle theme"
+              onClick={() => navigate('/new-transaction')}
+              className="mr-4 px-4 py-2 rounded-md bg-primary-600 text-white hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600"
             >
-              {themeMode === 'dark' ? (
+              <span className="flex items-center">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
+                  className="h-5 w-5 mr-1"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
                 >
                   <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+                    fillRule="evenodd"
+                    d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+                    clipRule="evenodd"
                   />
                 </svg>
-              ) : (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
-                  />
-                </svg>
-              )}
+                New
+              </span>
             </button>
 
             {/* User menu */}
@@ -191,6 +171,13 @@ export const Navbar = () => {
               {link.label}
             </Link>
           ))}
+          <Link
+            to="/new-transaction"
+            onClick={closeMenu}
+            className="block px-3 py-2 rounded-md text-base font-medium bg-primary-600 text-white hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 mt-2"
+          >
+            New Transaction
+          </Link>
         </div>
       </div>
     </nav>
