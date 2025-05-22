@@ -8,6 +8,7 @@ export type User = {
   phoneNumber: string;
   village: string;
   address?: string;
+  isEmailVerified?: boolean;
 };
 
 export type TransactionStatus = 'active' | 'partially_paid' | 'completed' | 'overdue';

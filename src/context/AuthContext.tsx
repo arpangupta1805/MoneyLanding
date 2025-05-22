@@ -16,6 +16,8 @@ export type VerificationState = {
   userId: string;
   email: string;
   fullName: string;
+  verifyType?: 'registration' | 'email-change';
+  newEmail?: string;
 };
 
 interface AuthContextType {
@@ -33,6 +35,7 @@ interface AuthContextType {
   forgotPassword: (email: string) => Promise<any>;
   resetPassword: (userId: string, otp: string, newPassword: string) => Promise<boolean>;
   updateProfile: (userData: Partial<User>) => Promise<boolean>;
+  verifyEmailChange: (otp: string) => Promise<boolean>;
   isLoading: boolean;
 }
 
@@ -45,27 +48,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   
   // Check for saved session on load
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    const savedUser = localStorage.getItem('user');
-    
-    if (token && savedUser) {
-      setCurrentUser(JSON.parse(savedUser));
+    const loadUserData = () => {
+      const token = localStorage.getItem('token');
+      const savedUser = localStorage.getItem('user');
       
-      // Verify token validity with backend
-      authAPI.getProfile()
-        .then(response => {
-          if (response.success) {
-            setCurrentUser(response.user);
-          } else {
-            // Token invalid, clear session
-            logout();
+      if (token && savedUser) {
+        try {
+          const parsedUser = JSON.parse(savedUser);
+          setCurrentUser(parsedUser);
+          
+          // In a real app with a backend, verify token validity
+          // For now, we'll just use the localStorage data
+          if (process.env.NODE_ENV === 'development') {
+            console.log('User loaded from localStorage:', parsedUser);
           }
-        })
-        .catch(() => {
-          // Error checking token, clear session
-          logout();
-        });
-    }
+        } catch (error) {
+          console.error('Error parsing user data from localStorage:', error);
+          logout(); // Clear invalid data
+        }
+      }
+    };
+    
+    loadUserData();
   }, []);
 
   const login = async (username: string, password: string): Promise<boolean> => {
@@ -281,30 +285,101 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setIsLoading(true);
     
     try {
-      // In a real app, you would call an API endpoint
-      // const response = await authAPI.updateProfile(userData);
+      // Call the API to update the user profile in the database
+      const response = await authAPI.updateProfile(userData);
       
-      // For now, we'll simulate a successful update
-      if (currentUser) {
-        const updatedUser = { ...currentUser, ...userData };
+      // Check if email verification is required
+      if (response.requiresVerification) {
+        // Set verification state for email change
+        setVerificationState({
+          userId: response.userId,
+          email: currentUser?.email || '',
+          fullName: currentUser?.fullName || '',
+          verifyType: 'email-change',
+          newEmail: userData.email
+        });
+        
+        toast.info('We sent a verification code to your new email address. Please verify to complete the email change.');
+        setIsLoading(false);
+        return true;
+      }
+      
+      // Normal update (no email change or no verification required)
+      if (response.success) {
+        // If the API call is successful, update the local state and storage
+        if (currentUser) {
+          const updatedUser = response.user || { 
+            ...currentUser, 
+            ...userData,
+            // Ensure username and id remain unchanged
+            username: currentUser.username,
+            id: currentUser.id 
+          };
+          
+          // Update local storage
+          localStorage.setItem('user', JSON.stringify(updatedUser));
+          
+          // Update state
+          setCurrentUser(updatedUser);
+          
+          toast.success('Profile updated successfully!');
+          setIsLoading(false);
+          return true;
+        }
+      } else {
+        toast.error(response.message || 'Failed to update profile');
+        setIsLoading(false);
+        return false;
+      }
+      
+      setIsLoading(false);
+      return false;
+    } catch (error: any) {
+      console.error('Profile update error:', error);
+      toast.error(error.message || 'Failed to update profile');
+      setIsLoading(false);
+      return false;
+    }
+  };
+
+  // Add verifyEmailChange function
+  const verifyEmailChange = async (otp: string): Promise<boolean> => {
+    setIsLoading(true);
+    
+    try {
+      if (!verificationState || !currentUser) {
+        toast.error('No email change in progress');
+        setIsLoading(false);
+        return false;
+      }
+      
+      const response = await authAPI.verifyEmailChange(
+        currentUser.id,
+        otp
+      );
+      
+      if (response.success) {
+        // Update the user with new email from the response
+        const updatedUser = response.user;
         
         // Update local storage
         localStorage.setItem('user', JSON.stringify(updatedUser));
         
         // Update state
         setCurrentUser(updatedUser);
+        setVerificationState(null);
         
-        toast.success('Profile updated successfully!');
+        toast.success(response.message || 'Email changed successfully!');
         setIsLoading(false);
         return true;
       } else {
-        toast.error('You must be logged in to update your profile');
+        toast.error(response.message || 'Email change verification failed');
         setIsLoading(false);
         return false;
       }
     } catch (error: any) {
-      console.error('Profile update error:', error);
-      toast.error(error.message || 'Failed to update profile');
+      console.error('Email change verification error:', error);
+      toast.error(error.message || 'Email change verification failed');
       setIsLoading(false);
       return false;
     }
@@ -327,6 +402,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         forgotPassword,
         resetPassword,
         updateProfile,
+        verifyEmailChange,
         isLoading
       }}
     >

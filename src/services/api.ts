@@ -133,6 +133,29 @@ export const authAPI = {
     } catch (error: any) {
       throw error.response?.data || { message: 'Network error' };
     }
+  },
+
+  // Update user profile
+  updateProfile: async (userData: any) => {
+    try {
+      const response = await api.put('/auth/profile', userData);
+      return response.data;
+    } catch (error: any) {
+      throw error.response?.data || { message: 'Network error' };
+    }
+  },
+
+  // Verify email change with OTP
+  verifyEmailChange: async (userId: string, otp: string) => {
+    try {
+      const response = await api.post('/auth/verify-email', { 
+        userId,
+        otp 
+      });
+      return response.data;
+    } catch (error: any) {
+      throw error.response?.data || { message: 'Network error' };
+    }
   }
 };
 
