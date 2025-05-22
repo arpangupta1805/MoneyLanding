@@ -57,11 +57,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           const parsedUser = JSON.parse(savedUser);
           setCurrentUser(parsedUser);
           
-          // In a real app with a backend, verify token validity
-          // For now, we'll just use the localStorage data
-          if (process.env.NODE_ENV === 'development') {
-            console.log('User loaded from localStorage:', parsedUser);
-          }
+          
         } catch (error) {
           console.error('Error parsing user data from localStorage:', error);
           logout(); // Clear invalid data

@@ -10,7 +10,6 @@ export const EmailChangeVerification = ({ onClose }: EmailChangeVerificationProp
   const { verificationState, verifyEmailChange, setVerificationState, isLoading } = useAuth();
   const [otp, setOtp] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const [otpSending, setOtpSending] = useState(false);
   
   // Focus on OTP input when component mounts
   useEffect(() => {
