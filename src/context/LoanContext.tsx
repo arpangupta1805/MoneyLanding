@@ -1,9 +1,9 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { parseISO, isAfter, addMonths } from 'date-fns';
-import { Loan, LoanStatus, Transaction, User } from '../types';
+import type { Loan, Transaction, User } from '../types';
+import { LoanStatus } from '../types';
 import { useAuth } from './AuthContext';
-import { addDays, isBefore } from 'date-fns';
 
 interface LoanContextType {
   loans: Loan[];
@@ -24,8 +24,7 @@ interface LoanContextType {
   addTransaction: (
     loanId: string,
     amount: number,
-    type: 'repayment' | 'additional-loan',
-    notes?: string
+    type: 'repayment' | 'additional-loan'
   ) => void;
   recalculateInterest: (loanId: string) => void;
 }
@@ -193,8 +192,7 @@ export const LoanProvider = ({ children }: LoanProviderProps) => {
   const addTransaction = (
     loanId: string,
     amount: number,
-    type: 'repayment' | 'additional-loan',
-    notes?: string
+    type: 'repayment' | 'additional-loan'
   ) => {
     const loan = getLoanById(loanId);
     if (!loan) return;
@@ -205,6 +203,10 @@ export const LoanProvider = ({ children }: LoanProviderProps) => {
       borrowerId: loan.borrowerId,
       borrowerUsername: loan.borrowerUsername,
       borrowerName: loan.borrowerName,
+      borrowerFatherName: '',
+      address: '',
+      village: '',
+      phone: '',
       amount: amount,
       interestRate: loan.interestRate,
       duration: loan.durationMonths,
@@ -213,6 +215,9 @@ export const LoanProvider = ({ children }: LoanProviderProps) => {
       status: loan.status,
       remainingBalance: type === 'repayment' ? loan.currentAmount - amount : loan.currentAmount + amount,
       initialAmount: loan.initialAmount,
+      monthlyEmi: 0,
+      totalPayable: 0,
+      totalInterest: 0,
     };
 
     updateLoan(loanId, {

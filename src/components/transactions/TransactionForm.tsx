@@ -5,11 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { transactionAPI } from '../../services/api';
 
-interface TransactionFormProps {
-  onClose?: () => void;
-}
-
-export const TransactionForm = ({ onClose }: TransactionFormProps) => {
+export const TransactionForm = () => {
   const navigate = useNavigate();
   const { addTransaction, getBorrowerProfileByPhone, saveBorrowerProfile } = useTransactions();
   const { currentUser } = useAuth();

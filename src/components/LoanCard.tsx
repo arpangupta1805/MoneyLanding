@@ -14,7 +14,8 @@ import {
   CalendarToday,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
-import { Loan, LoanStatus } from '../types/index';
+import type { Loan } from '../types/index';
+import { LoanStatus } from '../types/index';
 
 interface LoanCardProps {
   loan: Loan;

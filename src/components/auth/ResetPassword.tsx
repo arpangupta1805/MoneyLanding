@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { toast } from 'react-toastify';
 
 interface ResetPasswordProps {
   userId: string;
@@ -10,7 +9,7 @@ interface ResetPasswordProps {
 }
 
 export const ResetPassword = ({ userId, email, onBack, onSuccess }: ResetPasswordProps) => {
-  const { resetPassword, validatePassword, isLoading } = useAuth();
+  const { resetPassword, isLoading } = useAuth();
   const [otp, setOtp] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
