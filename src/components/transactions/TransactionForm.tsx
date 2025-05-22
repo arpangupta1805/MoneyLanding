@@ -5,7 +5,11 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { transactionAPI } from '../../services/api';
 
-export const TransactionForm = () => {
+interface TransactionFormProps {
+  onClose?: () => void;
+}
+
+export const TransactionForm = ({ onClose }: TransactionFormProps) => {
   const navigate = useNavigate();
   const { addTransaction, getBorrowerProfileByPhone, saveBorrowerProfile } = useTransactions();
   const { currentUser } = useAuth();
@@ -209,7 +213,11 @@ export const TransactionForm = () => {
       totalInterest: totalInterest || 0,
     });
     
-    navigate('/');
+    if (onClose) {
+      onClose();
+    } else {
+      navigate('/');
+    }
   };
 
   const formatCurrency = (amount: number) => {
@@ -223,7 +231,7 @@ export const TransactionForm = () => {
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
         <button
-          onClick={() => navigate(-1)}
+          onClick={() => onClose ? onClose() : navigate(-1)}
           className="flex items-center text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
         >
           <svg
@@ -499,7 +507,7 @@ export const TransactionForm = () => {
           <div className="mt-8 flex justify-end space-x-3">
             <button
               type="button"
-              onClick={() => navigate(-1)}
+              onClick={() => onClose ? onClose() : navigate(-1)}
               className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600"
             >
               Cancel
