@@ -1,9 +1,9 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
-import type { Loan, Transaction, User } from '../types/index';
-import { LoanStatus } from '../types/index';
+import { parseISO, isAfter, addMonths } from 'date-fns';
+import { Loan, LoanStatus, Transaction, User } from '../types';
 import { useAuth } from './AuthContext';
-import { addDays, addMonths, isBefore, parseISO, isAfter } from 'date-fns';
+import { addDays, isBefore } from 'date-fns';
 
 interface LoanContextType {
   loans: Loan[];
@@ -161,7 +161,7 @@ export const LoanProvider = ({ children }: LoanProviderProps) => {
         lenderId: currentUser.id,
         borrowerId: borrower.id,
         borrowerUsername: borrower.username,
-        borrowerName: borrower.name,
+        borrowerName: borrower.fullName,
         initialAmount: amount,
         currentAmount: amount,
         interestRate,

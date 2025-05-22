@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
+import type { ReactNode } from 'react';
 import { toast } from 'react-toastify';
 import type { User } from '../types/index';
 import { authAPI } from '../services/api';
@@ -31,6 +32,7 @@ interface AuthContextType {
   setVerificationState: (state: VerificationState | null) => void;
   forgotPassword: (email: string) => Promise<any>;
   resetPassword: (userId: string, otp: string, newPassword: string) => Promise<boolean>;
+  updateProfile: (userData: Partial<User>) => Promise<boolean>;
   isLoading: boolean;
 }
 
@@ -274,6 +276,40 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  // Add updateProfile function
+  const updateProfile = async (userData: Partial<User>): Promise<boolean> => {
+    setIsLoading(true);
+    
+    try {
+      // In a real app, you would call an API endpoint
+      // const response = await authAPI.updateProfile(userData);
+      
+      // For now, we'll simulate a successful update
+      if (currentUser) {
+        const updatedUser = { ...currentUser, ...userData };
+        
+        // Update local storage
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        
+        // Update state
+        setCurrentUser(updatedUser);
+        
+        toast.success('Profile updated successfully!');
+        setIsLoading(false);
+        return true;
+      } else {
+        toast.error('You must be logged in to update your profile');
+        setIsLoading(false);
+        return false;
+      }
+    } catch (error: any) {
+      console.error('Profile update error:', error);
+      toast.error(error.message || 'Failed to update profile');
+      setIsLoading(false);
+      return false;
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -290,6 +326,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setVerificationState,
         forgotPassword,
         resetPassword,
+        updateProfile,
         isLoading
       }}
     >

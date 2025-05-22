@@ -29,74 +29,39 @@ export const ResetPassword = ({ userId, email, onBack, onSuccess }: ResetPasswor
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
-    setSubmitting(true);
-
-    if (!otp || !password || !confirmPassword) {
-      setError('Please fill all required fields');
-      toast.error('Please fill all required fields');
-      setSubmitting(false);
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setError('Passwords do not match');
-      toast.error('Passwords do not match');
-      setSubmitting(false);
-      return;
-    }
-
-    // Check password strength
-    const validations = await validatePassword(password);
-    const isStrongPassword = Object.values(validations).every(Boolean);
     
-    if (!isStrongPassword) {
-      setError('Password does not meet strength requirements');
-      toast.error('Please use a stronger password');
-      setSubmitting(false);
+    // Validate inputs
+    if (!otp) {
+      setError('Please enter the verification code.');
       return;
     }
-
+    
+    if (!password) {
+      setError('Please enter a new password.');
+      return;
+    }
+    
+    if (password !== confirmPassword) {
+      setError('Passwords do not match.');
+      return;
+    }
+    
+    setError('');
+    setSubmitting(true);
+    
     try {
       const success = await resetPassword(userId, otp, password);
-
+      
       if (success) {
-        toast.success('Password reset successful! You can now log in with your new password.');
         onSuccess();
       } else {
-        setError('Invalid or expired OTP. Please try again.');
+        setError('Failed to reset password. Please check your code and try again.');
         setSubmitting(false);
       }
     } catch (error) {
       setError('An error occurred. Please try again later.');
       setSubmitting(false);
     }
-  };
-
-  const getPasswordValidations = async () => {
-    if (!password) return null;
-    
-    const validations = await validatePassword(password);
-    
-    return (
-      <ul className="text-xs space-y-1 mt-2">
-        <li className={validations.minLength ? 'text-green-600' : 'text-red-600'}>
-          ✓ At least 8 characters
-        </li>
-        <li className={validations.hasUpperCase ? 'text-green-600' : 'text-red-600'}>
-          ✓ At least one uppercase letter
-        </li>
-        <li className={validations.hasLowerCase ? 'text-green-600' : 'text-red-600'}>
-          ✓ At least one lowercase letter
-        </li>
-        <li className={validations.hasNumber ? 'text-green-600' : 'text-red-600'}>
-          ✓ At least one number
-        </li>
-        <li className={validations.hasSpecialChar ? 'text-green-600' : 'text-red-600'}>
-          ✓ At least one special character
-        </li>
-      </ul>
-    );
   };
 
   // Show loading state while OTP is being sent

@@ -54,12 +54,14 @@ export type UserStats = {
   overdueBorrowed: number;
 };
 
-export enum LoanStatus {
-  ACTIVE = 'active',
-  PARTIALLY_PAID = 'partially_paid',
-  COMPLETED = 'completed',
-  OVERDUE = 'overdue'
-}
+export const LoanStatus = {
+  ACTIVE: 'active',
+  PARTIALLY_PAID: 'partially_paid',
+  COMPLETED: 'completed',
+  OVERDUE: 'overdue'
+} as const;
+
+export type LoanStatus = typeof LoanStatus[keyof typeof LoanStatus];
 
 export interface Loan {
   id: string;

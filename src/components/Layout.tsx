@@ -109,7 +109,7 @@ const Layout = () => {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-            {currentUser ? `Welcome, ${currentUser.name}` : 'MoneySense'}
+            {currentUser ? `Welcome, ${currentUser.fullName}` : 'MoneySense'}
           </Typography>
           
           <IconButton 
@@ -127,7 +127,7 @@ const Layout = () => {
             sx={{ marginLeft: 1 }}
           >
             <Avatar sx={{ width: 32, height: 32, bgcolor: muiTheme.palette.secondary.main }}>
-              {currentUser?.name?.charAt(0) || 'U'}
+              {currentUser?.fullName?.charAt(0) || 'U'}
             </Avatar>
           </IconButton>
           
