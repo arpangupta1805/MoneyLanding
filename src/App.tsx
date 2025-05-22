@@ -6,6 +6,7 @@ import { LentPage } from './components/pages/LentPage';
 import { BorrowedPage } from './components/pages/BorrowedPage';
 import { OverduePage } from './components/pages/OverduePage';
 import { SettledPage } from './components/pages/SettledPage';
+import { ProfilePage } from './components/pages/ProfilePage';
 import { TransactionDetail } from './components/transactions/TransactionDetail';
 import { TransactionForm } from './components/transactions/TransactionForm';
 import { useAuth } from './context/AuthContext';
@@ -90,6 +91,14 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <SettledPage />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="profile" 
+                  element={
+                    <ProtectedRoute>
+                      <ProfilePage />
                     </ProtectedRoute>
                   } 
                 />
